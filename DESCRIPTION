@@ -1,0 +1,20 @@
+Package: AIScanR
+Type: Package
+Title: Alerts for newly detected aquatic species
+Version: 0.1.0
+Author: Remi Daigle
+Maintainer: Remi Daigle <Remi.Daigle@dfo-mpo.gc.ca>
+Description: Queries public online species occurence databases (OBIS, GBIF, iNaturalist) and creates email alerts fo potential new aquatic invasive species early detection.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Imports:
+    data.table,
+    rcanvec,
+    rgbif,
+    robis,
+    sf,
+    sp,
+    spocc,
+    tidyverse
+RoxygenNote: 7.1.0
