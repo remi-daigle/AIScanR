@@ -14,15 +14,15 @@ getdata <- function(grid, g,latlong){
   cell <- grid[g,]
 
   n <- spocc::occ(from=c("inat"),
-                  geometry= st_as_text(st_transform(cell,latlong)$geometry),
+                  geometry= sf::st_as_text(sf::st_transform(cell,latlong)$geometry),
                   limit=1)$inat$meta$found
 
-  subgrid <- st_make_grid(cell,n=(n%/%10000+1)*2)
+  subgrid <- sf::st_make_grid(cell,n=(n%/%10000+1)*2)
 
   occ <- data.frame()
   for(s in 1:length(subgrid)){
 
-    llcell <- st_transform(subgrid[s],latlong)
+    llcell <- sf::st_transform(subgrid[s],latlong)
 
 
     # get OBIS data
@@ -50,12 +50,12 @@ getdata <- function(grid, g,latlong){
                                  basisOfRecord="OBSERVATION",
                                  return="meta")$count
     while(nrow(gbif)<anygbif){
-      gbif <- bind_rows(gbif,
-                        rgbif::occ_search(geometry = st_as_text(llcell),
-                                          basisOfRecord="OBSERVATION",
-                                          return='data',
-                                          start=nrow(gbif),
-                                          limit=500))
+      gbif <- dplyr::bind_rows(gbif,
+                               rgbif::occ_search(geometry = st_as_text(llcell),
+                                                 basisOfRecord="OBSERVATION",
+                                                 return='data',
+                                                 start=nrow(gbif),
+                                                 limit=500))
       # print(nrow(gbif))
     }
 
@@ -101,26 +101,26 @@ getdata <- function(grid, g,latlong){
     # combine the datasets and make into sf objects
     occ <- bind_rows(occ,
                      rbind(obis %>%
-                             st_as_sf(coords=c("decimalLongitude","decimalLatitude"),crs=latlong) %>%
-                             mutate(link=paste0('https://obis.org/dataset/',dataset_id)) %>%
-                             select(scientificName,link,eventDate),
+                             sf::st_as_sf(coords=c("decimalLongitude","decimalLatitude"),crs=latlong) %>%
+                             dplyr::mutate(link=paste0('https://obis.org/dataset/',dataset_id)) %>%
+                             dplyr::select(scientificName,link,eventDate),
                            gbif %>%
-                             st_as_sf(coords=c("decimalLongitude","decimalLatitude"),crs=latlong) %>%
-                             mutate(link=paste0('https://www.gbif.org/occurrence/',gbifID)) %>%
-                             select(scientificName,link,eventDate),
+                             sf::st_as_sf(coords=c("decimalLongitude","decimalLatitude"),crs=latlong) %>%
+                             dplyr::mutate(link=paste0('https://www.gbif.org/occurrence/',gbifID)) %>%
+                             dplyr::select(scientificName,link,eventDate),
                            inat %>%
-                             filter(!is.na(longitude),
-                                    !is.na(latitude),
-                                    !is.na(name),
-                                    quality_grade=='research') %>%
+                             dplyr::filter(!is.na(longitude),
+                                           !is.na(latitude),
+                                           !is.na(name),
+                                           quality_grade=='research') %>%
                              st_as_sf(coords=c("longitude","latitude"),crs=latlong) %>%
-                             mutate(incell=lengths(st_intersects(.,llcell))>0,
-                                    link=paste0('https://www.inaturalist.org/observations/',id),
-                                    scientificName=name,
-                                    eventDate=observed_on_details.date) %>%
-                             filter(incell,!is.na(scientificName)) %>%
-                             select(scientificName,link,eventDate)))
+                             dplyr::mutate(incell=lengths(st_intersects(.,llcell))>0,
+                                           link=paste0('https://www.inaturalist.org/observations/',id),
+                                           scientificName=name,
+                                           eventDate=observed_on_details.date) %>%
+                             dplyr::filter(incell,!is.na(scientificName)) %>%
+                             dplyr::select(scientificName,link,eventDate)))
     print(nrow(occ))
   }
-  return(unique(occ)%>% st_as_sf(crs=latlong))
+  return(unique(occ)%>% sf::st_as_sf(crs=latlong))
 }

@@ -5,13 +5,14 @@
 #' @param EEZ polygon for EEZ
 #' @param latlong Latitude Longitude coordinate reference system
 #' @param proj Projected coordinate reference system
+#' @param cachedir Directory for canvec data caching
 #'
 #' @return
 #' @export
 #'
 #' @examples
 #' wet <- iswet(grid,g,EEZ,latlong,proj)
-iswet <- function(grid,g,EEZ,latlong,proj){
+iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL){
   require(sf)
   if(file.exists(paste0("data/wet/wet_",sprintf("%05d",g),".shp"))){
     wet <- st_read(paste0("data/wet/wet_",sprintf("%05d",g),".shp"))
