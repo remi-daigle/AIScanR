@@ -21,7 +21,7 @@ iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL){
     if(lengths(sf::st_intersects(cell,Canada))>0){
       NTSs <- rcanvec::nts(bbox=sp::bbox(as(sf::st_transform(cell,latlong),"Spatial")))
 
-      rcanvec::canvec.download(NTSs)
+      rcanvec::canvec.download(NTSs,cachedir = cachedir)
 
       freshwater <- st_sf(geometry=st_sfc(crs=proj))
       for(n in NTSs){
