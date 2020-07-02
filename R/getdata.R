@@ -19,7 +19,8 @@ getdata <- function(grid, g,latlong){
 
   subgrid <- sf::st_make_grid(cell,n=(n%/%10000+1)*2)
 
-  occ <- data.frame()
+  occ <- data.frame(geometry=st_sfc()) %>%
+    st_as_sf()
   for(s in 1:length(subgrid)){
 
     llcell <- sf::st_transform(subgrid[s],latlong)
@@ -29,6 +30,7 @@ getdata <- function(grid, g,latlong){
     print(paste("Querying OBIS for subgrid:",s))
 
     obis <- robis::occurrence(geometry = st_as_text(llcell))
+
 
 
 
@@ -47,15 +49,13 @@ getdata <- function(grid, g,latlong){
 
     gbif <- data.frame()
     anygbif <- rgbif::occ_search(geometry = st_as_text(llcell),
-                                 basisOfRecord="OBSERVATION",
-                                 return="meta")$count
+                                 basisOfRecord="OBSERVATION")$meta$count
     while(nrow(gbif)<anygbif){
       gbif <- dplyr::bind_rows(gbif,
-                               rgbif::occ_search(geometry = st_as_text(llcell),
+                               rgbif::occ_data(geometry = st_as_text(llcell),
                                                  basisOfRecord="OBSERVATION",
-                                                 return='data',
                                                  start=nrow(gbif),
-                                                 limit=500))
+                                                 limit=500)$data)
       # print(nrow(gbif))
     }
 
