@@ -39,7 +39,7 @@ iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL){
           sf::st_combine() %>%
           sf::st_union() %>%
           sf::st_transform(proj) %>%
-          st_buffer(1) %>%
+          st_buffer(5) %>%
           sf::st_intersection(cell))
         if(length(canvecs)>0 & !class(canvecs)=="try-error"){
           freshwater <- st_union(freshwater,canvecs)
