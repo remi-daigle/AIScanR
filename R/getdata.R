@@ -122,5 +122,6 @@ getdata <- function(grid, g,latlong){
                              dplyr::select(scientificName,link,eventDate)))
     print(nrow(occ))
   }
-  return(unique(occ)%>% sf::st_as_sf(crs=latlong))
+  return(unique(occ) %>%
+           mutate(geometry=st_sfc(geometry,crs=latlong)))
 }
