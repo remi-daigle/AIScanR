@@ -35,12 +35,12 @@ getdata <- function(grid, g,latlong){
 
 
     if(nrow(obis)==0){
-      obis <- data.frame(matrix(ncol=5,nrow=0,
-                                dimnames=list(NULL,c("scientificName",
-                                                     "decimalLongitude",
-                                                     "decimalLatitude",
-                                                     "eventDate",
-                                                     "dataset_id"))))
+      obis <- data.frame(scientificName=character(),
+                         decimalLongitude=double(),
+                         decimalLatitude=double(),
+                         eventDate=character(),
+                         dataset_id=character(),
+                         stringsAsFactors = FALSE)
     }
     if(!'eventDate' %in% names(obis)) obis$eventDate=NA
 
@@ -60,12 +60,12 @@ getdata <- function(grid, g,latlong){
     }
 
     if(nrow(gbif)==0){
-      gbif <- data.frame(matrix(ncol=5,nrow=0,
-                                dimnames=list(NULL,c("scientificName",
-                                                     "decimalLongitude",
-                                                     "decimalLatitude",
-                                                     "eventDate",
-                                                     "gbifID"))))
+      gbif <- data.frame(scientificName=character(),
+                         decimalLongitude=double(),
+                         decimalLatitude=double(),
+                         eventDate=character(),
+                         gbifID=character(),
+                         stringsAsFactors = FALSE)
     }
 
     # get inat data
@@ -87,12 +87,13 @@ getdata <- function(grid, g,latlong){
     }
 
     if(nrow(inat)==0){
-      inat <- data.frame(matrix(ncol=5,nrow=0,
-                                dimnames=list(NULL,c("name",
-                                                     "longitude",
-                                                     "latitude",
-                                                     "observed_on_details.date",
-                                                     "id"))))
+      inat <- data.frame(name=character(),
+                         longitude=double(),
+                         latitude=double(),
+                         observed_on_details.date=character(),
+                         id=character(),
+                         quality_grade=character(),
+                         stringsAsFactors = FALSE)
     }
     if(!'name' %in% names(inat)) inat$name=NA
     if(!'observed_on_details.date' %in% names(inat)) inat$observed_on_details.date=NA
