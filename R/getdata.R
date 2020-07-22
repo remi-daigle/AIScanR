@@ -19,7 +19,7 @@ getdata <- function(grid, g,latlong){
 
   subgrid <- sf::st_make_grid(cell,n=(n%/%10000+1)*2)
 
-  occ <- data.frame(geometry=st_sfc()) %>%
+  occ <- data.frame(geometry=st_sfc(crs=latlong)) %>%
     st_as_sf()
   for(s in 1:length(subgrid)){
 
