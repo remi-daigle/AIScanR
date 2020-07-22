@@ -8,10 +8,10 @@
 #'
 #' @examples
 #' isaquatic(occ,wet)
-isaquatic <- function(occ,wet){
+isaquatic <- function(occ,wet,datadir="data/"){
   if(nrow(occ)!=0){
-    if(file.exists("data/aquatic_species.csv")){
-      aquasp <- read.csv("data/aquatic_species.csv",stringsAsFactors = FALSE)
+    if(file.exists(paste0(datadir,"aquatic_species.csv"))){
+      aquasp <- read.csv(paste0(datadir,"aquatic_species.csv"),stringsAsFactors = FALSE)
     } else {
       aquasp <-  occ  %>%
         dplyr::select(scientificName) %>%
@@ -39,7 +39,7 @@ isaquatic <- function(occ,wet){
       dplyr::select(scientificName,aquatic) %>%
       dplyr::mutate(aquatic=replace_na(aquatic,replace=FALSE))
 
-    write.csv(aquasp,"data/aquatic_species.csv",row.names = FALSE)
+    write.csv(aquasp,paste0(datadir,"aquatic_species.csv"),row.names = FALSE)
   } else {
     aquasp <- data.frame()
   }
