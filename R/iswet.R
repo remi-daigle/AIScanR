@@ -12,10 +12,10 @@
 #'
 #' @examples
 #' wet <- iswet(grid,g,EEZ,latlong,proj)
-iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL){
+iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL,datadir="data/wet/"){
   require(sf)
-  if(file.exists(paste0("data/wet/wet_",sprintf("%05d",g),".shp"))){
-    wet <- st_read(paste0("data/wet/wet_",sprintf("%05d",g),".shp"))
+  if(file.exists(paste0(datadir,"wet_",sprintf("%05d",g),".shp"))){
+    wet <- st_read(paste0(datadir,"wet_",sprintf("%05d",g),".shp"))
   }else{
     cell <- grid[g,]
     if(lengths(sf::st_intersects(cell,Canada))>0){
@@ -26,12 +26,12 @@ iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL){
       freshwater <- st_sf(geometry=st_sfc(crs=proj))
       for(n in NTSs){
         print(n)
-        canvecs <- try(c(rcanvec::canvec.load(n,"waterbody"),
-                     rcanvec::canvec.load(n,"river"),
-                     rcanvec::canvec.load(n,"string_bog"),
-                     rcanvec::canvec.load(n,"wetland"),
-                     rcanvec::canvec.load(n,"palsa_bog"),
-                     rcanvec::canvec.load(n,"tundra_pond")) %>%
+        canvecs <- try(c(rcanvec::canvec.load(n,"waterbody",cachedir = cachedir),
+                     rcanvec::canvec.load(n,"river",cachedir = cachedir),
+                     rcanvec::canvec.load(n,"string_bog",cachedir = cachedir),
+                     rcanvec::canvec.load(n,"wetland",cachedir = cachedir),
+                     rcanvec::canvec.load(n,"palsa_bog",cachedir = cachedir),
+                     rcanvec::canvec.load(n,"tundra_pond",cachedir = cachedir)) %>%
           lapply(sf::st_as_sf) %>%
           lapply(function(x) as.data.frame(x) %>% dplyr::select(geometry)) %>%
           dplyr::bind_rows() %>%
@@ -102,7 +102,7 @@ iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL){
         sf::st_transform(latlong)
     }
 
-    sf::st_write(wet,paste0("data/wet/wet_",sprintf("%05d",g),".shp"))
+    sf::st_write(wet,paste0(datadir,"wet_",sprintf("%05d",g),".shp"))
   }
 
   return(wet)
