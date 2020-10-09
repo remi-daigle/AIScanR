@@ -14,10 +14,10 @@ getdata <- function(grid, g,latlong){
   cell <- grid[g,]
 
   n <- spocc::occ(from=c("inat"),
-                  geometry= sf::st_as_text(sf::st_transform(cell,latlong)$geometry),
+                  geometry= sf::st_as_text(sf::st_geometry(sf::st_transform(cell,latlong))),
                   limit=1)$inat$meta$found
 
-  subgrid <- sf::st_make_grid(cell,n=(n%/%10000+1)*2)
+  subgrid <- sf::st_make_grid(cell,n=(n%/%10000+1)*2-1)
 
   occ <- data.frame(geometry=st_sfc(crs=latlong)) %>%
     st_as_sf()
@@ -55,7 +55,8 @@ getdata <- function(grid, g,latlong){
                                rgbif::occ_data(geometry = st_as_text(llcell),
                                                  basisOfRecord="OBSERVATION",
                                                  start=nrow(gbif),
-                                                 limit=500)$data)
+                                                 limit=500)$data %>%
+                                 dplyr::select(-gadm))
       # print(nrow(gbif))
     }
 
