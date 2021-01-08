@@ -37,7 +37,7 @@ isaquatic <- function(occ,wet,datadir="data/"){
       dplyr::rowwise() %>%
       dplyr::mutate(aquatic=any(aquatic.x,aquatic.y)) %>%
       dplyr::select(scientificName,aquatic) %>%
-      dplyr::mutate(aquatic=replace_na(aquatic,replace=FALSE))
+      dplyr::mutate(aquatic=tidyr::replace_na(aquatic,replace=FALSE))
 
     write.csv(aquasp,paste0(datadir,"aquatic_species.csv"),row.names = FALSE)
   } else {

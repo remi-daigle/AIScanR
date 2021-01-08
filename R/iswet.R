@@ -12,12 +12,12 @@
 #'
 #' @examples
 #' wet <- iswet(grid,g,EEZ,latlong,proj)
-iswet <- function(grid,g,EEZ,latlong,proj,cachedir=NULL,datadir="data/wet/"){
+iswet <- function(grid,g,EEZ,latlong,proj,Canada,cachedir=NULL,datadir="data/wet/"){
   require(sf)
   if(file.exists(paste0(datadir,"wet_",sprintf("%05d",g),".shp"))){
     wet <- st_read(paste0(datadir,"wet_",sprintf("%05d",g),".shp"))
   }else{
-    cell <- grid[g,]
+    cell <- grid[g,] %>% st_transform(st_crs(Canada))
     if(lengths(sf::st_intersects(cell,Canada))>0){
       NTSs <- rcanvec::nts(bbox=sp::bbox(as(sf::st_transform(cell,latlong),"Spatial")))
 

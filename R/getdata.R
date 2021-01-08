@@ -19,8 +19,8 @@ getdata <- function(grid, g,latlong){
 
   subgrid <- sf::st_make_grid(cell,n=(n%/%10000+1)*2-1)
 
-  occ <- data.frame(geometry=st_sfc(crs=latlong)) %>%
-    st_as_sf()
+  occ <- data.frame(geometry=sf::st_sfc(crs=latlong)) %>%
+    sf::st_as_sf()
   for(s in 1:length(subgrid)){
 
     llcell <- sf::st_transform(subgrid[s],latlong)
@@ -29,7 +29,7 @@ getdata <- function(grid, g,latlong){
     # get OBIS data
     print(paste("Querying OBIS for subgrid:",s))
 
-    obis <- robis::occurrence(geometry = st_as_text(llcell))
+    obis <- robis::occurrence(geometry = sf::st_as_text(llcell))
 
 
 
@@ -48,15 +48,19 @@ getdata <- function(grid, g,latlong){
     print(paste("Querying GBIF for subgrid:",s))
 
     gbif <- data.frame()
-    anygbif <- rgbif::occ_search(geometry = st_as_text(llcell),
+    anygbif <- rgbif::occ_search(geometry = sf::st_as_text(llcell),
                                  basisOfRecord="OBSERVATION")$meta$count
     while(nrow(gbif)<anygbif){
       gbif <- dplyr::bind_rows(gbif,
-                               rgbif::occ_data(geometry = st_as_text(llcell),
+                               rgbif::occ_data(geometry = sf::st_as_text(llcell),
                                                  basisOfRecord="OBSERVATION",
                                                  start=nrow(gbif),
-                                                 limit=500)$data %>%
-                                 dplyr::select(-gadm))
+                                                 limit=ifelse(anygbif-nrow(gbif)>500,500,anygbif-nrow(gbif)))$data %>%
+                                 dplyr::select_if(names(.) %in% c("scientificName",
+                                                                  "decimalLongitude",
+                                                                  "decimalLatitude",
+                                                                  "eventDate",
+                                                                  "gbifID")))
       # print(nrow(gbif))
     }
 
@@ -68,6 +72,8 @@ getdata <- function(grid, g,latlong){
                          gbifID=character(),
                          stringsAsFactors = FALSE)
     }
+    if(!'eventDate' %in% names(gbif)) gbif$eventDate=NA
+
 
     # get inat data
     print(paste("Querying iNaturalist for subgrid:",s))
@@ -75,13 +81,13 @@ getdata <- function(grid, g,latlong){
     inat <- data.frame()
     while(nrow(inat)%%30==0){
       new <- spocc::occ(from=c("inat"),
-                        geometry= st_as_text(llcell),
+                        geometry= sf::st_as_text(llcell),
                         page=nrow(inat)/30+1)$inat$data[[1]]
 
       if(nrow(new)==0){
         break
       }else{
-        inat <- bind_rows(inat,
+        inat <- dplyr::bind_rows(inat,
                           new)
       }
       # print(nrow(inat))
@@ -101,7 +107,7 @@ getdata <- function(grid, g,latlong){
 
 
     # combine the datasets and make into sf objects
-    occ <- bind_rows(occ,
+    occ <- dplyr::bind_rows(occ,
                      rbind(obis %>%
                              sf::st_as_sf(coords=c("decimalLongitude","decimalLatitude"),crs=latlong) %>%
                              dplyr::mutate(link=paste0('https://obis.org/dataset/',dataset_id)) %>%
@@ -125,5 +131,5 @@ getdata <- function(grid, g,latlong){
     print(nrow(occ))
   }
   return(unique(occ) %>%
-           mutate(geometry=st_sfc(geometry,crs=latlong)))
+           dplyr::mutate(geometry=sf::st_sfc(geometry,crs=latlong)))
 }
